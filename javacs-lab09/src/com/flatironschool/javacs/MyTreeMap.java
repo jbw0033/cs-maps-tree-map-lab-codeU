@@ -70,9 +70,20 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
-		
+		Node p = root;
 		// the actual search
-        // TODO: Fill this in.
+        while(p != null) {
+        	int cmp = k.compareTo(p.key);
+        	if(cmp == 0) {
+        		return p;
+        	}
+        	else if (cmp < 0) {
+        		p = p.left;
+        	}
+        	else {
+        		p = p.right;
+        	}
+        }
         return null;
 	}
 
@@ -92,6 +103,11 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		for(V value: values()) {
+			if (equals(value, target)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -117,8 +133,20 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
-        // TODO: Fill this in.
+		set.addAll(keySetHelper(root));
 		return set;
+	}
+	
+	private Collection<? extends K> keySetHelper(Node n) {
+		Deque<K> result = new LinkedList<K>();
+		if(n.left != null) {
+			result.addAll(keySetHelper(n.left));
+		}
+		result.add(n.key);
+		if(n.right != null) {
+			result.addAll(keySetHelper(n.right));
+		}	
+		return result;
 	}
 
 	@Override
@@ -134,8 +162,38 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		return putHelper(root, key, value);
 	}
 
+	@SuppressWarnings("unchecked")
 	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
+        Node old = findNode(key);
+        if (old != null) {
+        	findNode(key).value = value;
+        	return old.value;
+        }
+        else {
+        	Node p = node;
+        	while(p != null) {
+        		if(((Comparable<? super K>) key).compareTo(p.key) < 0) {
+        			if (p.left != null) {
+        				p = p.left;
+        			}
+        			else {
+        				p.left = new Node(key, value);
+        				break;
+        			}
+        		}
+        		else {
+        			if (p.right != null) {
+        				p = p.right;
+        			}
+        			else {
+        				p.right = new Node(key, value);
+        				break;
+        			}
+        		}
+        	}
+        	
+        }
+        size++;
         return null;
 	}
 
